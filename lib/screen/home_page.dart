@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lista_de_tarefas2/models/todo_model.dart';
+import 'package:lista_de_tarefas2/repository/todo_repository.dart';
 import 'package:lista_de_tarefas2/widgets/todo_list_item.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,9 +12,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   TextEditingController _todoControler = TextEditingController();
+  TodoRespository todoRespository = TodoRespository();
   List<Todo> todos = [];
   Todo? deletedTodo;
   int? deletedTodoPos;
+
+  @override
+  void initState() {
+    super.initState();
+
+    todoRespository.getTodoList().then((value) {
+      setState(() {
+        todos = value;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +57,7 @@ class _HomePageState extends State<HomePage> {
                             Todo todo =
                                 Todo(title: text, dateTime: DateTime.now());
                             todos.add(todo);
+                            todoRespository.saveTodoList(todos);
                             _todoControler.clear();
                           });
                         },
@@ -94,6 +108,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       todos.remove(todo);
     });
+    todoRespository.saveTodoList(todos);
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -105,6 +120,7 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               todos.insert(deletedTodoPos!, todo);
             });
+            todoRespository.saveTodoList(todos);
           },
         ),
       ),
@@ -130,6 +146,7 @@ class _HomePageState extends State<HomePage> {
               setState(() {
                 todos.clear();
               });
+              todoRespository.saveTodoList(todos);
             },
             child: const Text('Excluir'),
           ),
